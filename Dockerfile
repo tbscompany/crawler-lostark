@@ -4,7 +4,7 @@ ARG SHA
 
 WORKDIR /app
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-X 'main.version="$SHA"'"  -o bin/app
+RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -ldflags="-linkmode external -extldflags '-static' -X 'main.version="$SHA"'"  -o bin/app
 
 FROM alpine:latest as release
 RUN apk update && apk add ca-certificates sqlite && rm -rf /var/cache/apk/*
