@@ -1,0 +1,28 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  IMAGE: ghcr.io/tbscompany/crawler-lostark
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get short SHA
+        id: slug
+        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
+
+      - name: Docker Build
+        run: docker build -t ${{ env.IMAGE }}:${{ steps.slug.outputs.sha8 }} --build-arg SHA=${{ steps.slug.outputs.sha8 }} .
+
+      - name: Connect to registry
+        run: echo ${{ secrets.GH_TOKEN }} | docker login ghcr.io -u tbscompany --password-stdin
+
+      - name: Push image
+        run: docker push ${{ env.IMAGE }}:${{ steps.slug.outputs.sha8 }}
